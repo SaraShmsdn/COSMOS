@@ -1,6 +1,17 @@
+const API_Key = 'sbPqntpo70agLTf806rGDlAsgc2PAYPd76AeY5cx';
 
-var navLinks = document.querySelectorAll(".nav-link");
-var sections = document.querySelectorAll(".app-section");
+const apodDate = document.getElementById('apod-date');
+const apodDateInput = document.getElementById("apod-date-input");
+const apodImage = document.getElementById("apod-image");
+const apodLoading = document.getElementById("apod-loading");
+const apodTitle = document.getElementById("apod-title");
+const apodDateDetail = document.getElementById('apod-date-detail');
+const apodExplanation = document.getElementById("apod-explanation");
+const apodcopyright = document.getElementById("apod-copyright");
+const apodDateInfo = document.getElementById('apod-date-info');
+const apodMediaType = document.getElementById('apod-media-type');
+const navLinks = document.querySelectorAll(".nav-link");
+const sections = document.querySelectorAll(".app-section");
 
 navLinks.forEach(function (link) {
   link.addEventListener("click", function (e) {
@@ -24,8 +35,49 @@ navLinks.forEach(function (link) {
   });
 });
 
-getLaunches();
+async function getSpaceToday() {
+  try {
+    apodImage.classList.add("hidden");
+    apodLoading.classList.remove("hidden");
+    let url = `https://api.nasa.gov/planetary/apod?api_key=${API_Key}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    displayData(data);
+  } catch (error) {
+    console.log(error);
+  }
+  finally {
+    apodLoading.classList.add("hidden");
+    apodImage.classList.remove("hidden");
+  }
 
+}
+
+getSpaceToday();
+
+function displayData(data){
+  let todayDate = new Date(data.date).toLocaleString("en-US", {
+    month: "long",
+    day: "2-digit",
+    year: "numeric",
+  })
+  let customDate = new Date(data.date).toLocaleString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  })
+  apodDate.innerHTML = `Astronomy Picture of the Day - ${todayDate}`;
+  apodDateInput.value = customDate;
+  apodDateInput.nextElementSibling.innerHTML = customDate;
+  if (data.media_type === "image") {
+    apodImage.setAttribute("src", data.hdurl);
+  }
+  apodTitle.innerHTML = data.title;
+  apodExplanation.innerHTML = data.explanation;
+  apodDateDetail.innerHTML = `<i class="far fa-calendar mr-2"></i>${data.date}`;
+  apodcopyright.innerHTML = `&copy; ${data.copyright}`;
+  apodMediaType.innerHTML = data.media_type;
+}
 
 async function getLaunches() {
   var response = await fetch(
@@ -102,8 +154,11 @@ async function getLaunches() {
   document.getElementById("launches-grid").innerHTML = gridHTML;
 }
 
+getLaunches();
 
-// these api(s) https://api.nasa.gov/planetary/apod?api_key=sbPqntpo70agLTf806rGDlAsgc2PAYPd76AeY5cx and  https://api.nasa.gov/planetary/apod?api_key=sbPqntpo70agLTf806rGDlAsgc2PAYPd76AeY5cx&date=2025-12-01 
-//are giving error 504 
-//and this api https://solar-system-opendata-proxy.vercel.app/api/planets gave error 500 
+
+
+// this  api is  https://api.nasa.gov/planetary/apod?api_key=sbPqntpo70agLTf806rGDlAsgc2PAYPd76AeY5cx&date=2025-12-01
+//are giving error 504
+//and this api https://solar-system-opendata-proxy.vercel.app/api/planets gave error 500
 //they didn't work neither on browers nor on postman
